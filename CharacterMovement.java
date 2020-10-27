@@ -10,8 +10,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 /**
- * Hold down an arrow key to have your hero move around the screen.
- * Hold down the shift key to have the hero run.
+ * Hold down an arrow key to have your car drive around the screen. Make sure to avoid the other car!
+ * Hold down the shift key to have the driver step on the gas.
  */
 public class CharacterMovement extends Application {
 
@@ -150,7 +150,8 @@ public class CharacterMovement extends Application {
             car2.relocate(x - cx, y - cy);
         }
     }
-    
+    //Method used to calculate how far the second car needs to move to chase the player
+    //Method then relocates second car accordingly.
     private void giveChase() {
     	double C2x = car2.getLayoutX();
     	double C2y = car2.getLayoutY();
@@ -160,6 +161,8 @@ public class CharacterMovement extends Application {
     	double yDistance = C1y - C2y;
     	car2.relocate(C2x + (xDistance/ 250), C2y + (yDistance / 250));
     }
+    //Method designed to determine if the two cars are touching. 
+    //if touching return true, else return false
      private boolean isTouching(ImageView car) {
     	 double car2XBound = car2.getLayoutX();
     	 return true;
