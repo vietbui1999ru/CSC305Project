@@ -105,6 +105,9 @@ public class CharacterMovement extends Application {
 
                 moveCarBy(dx, dy);
                 giveChase();
+                if isTouching(car, car2) {
+                	car.relocate((W / 1.3, H / 2);
+                }
                 
             }
         };
@@ -161,10 +164,29 @@ public class CharacterMovement extends Application {
     	double yDistance = C1y - C2y;
     	car2.relocate(C2x + (xDistance/ 250), C2y + (yDistance / 250));
     }
+    //Helper method for isTouching(), which determines the minX, minY, maxX, and maxY
+    //of the specified car, and inserts them in an array for easy use by isTouching()
+    private double[] getBounds(ImageView car) {
+    	double[] boundsArray = new double[3];
+    	double halfX = car.getBoundsInLocal().getWidth() / 2;
+    	double halfY = car.getBoundsInLocal().getHeight() / 2;
+    	boundsArray[0] = car.getLayoutX() - halfX;
+    	boundsArray[1] = car.getLayoutY() - halfY;
+    	boundsArray[2] = car.getLayoutX() + halfX;
+    	boundsArray[3] = car.getLayoutY() + halfY;
+    	return boundsArray;
+    	
+    }
     //Method designed to determine if the two cars are touching. 
     //if touching return true, else return false
-     private boolean isTouching(ImageView car) {
-    	 double car2XBound = car2.getLayoutX();
+     private boolean isTouching(ImageView car, ImageView car2) {
+    	 double[] carBounds = getBounds(car);
+    	 double[] car2Bounds = getBounds(car2);
+    	 if(carBounds[3] < car2Bounds[0] || carBounds[0] > car2Bounds[3]) {
+    		 if(carBounds[4] < car2Bounds[1] || carBounds[1] >  car2Bounds[4]) {
+    			 return false;
+    		 }
+    	 }
     	 return true;
      }
 
