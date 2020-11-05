@@ -1,5 +1,7 @@
 package application;
 
+
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -40,13 +42,14 @@ public class CharacterMovement extends Application {
 
     private Image pauseImage;
     private Node pause;
-    
+    int counter = 0;
     boolean running, goNorth, goSouth, goEast, goWest;
 
     @Override
     public void start(Stage stage) throws Exception {
         carImage = new Image(CAR_IMAGE_LOC);
         car = new ImageView(carImage);
+        
         
         car2Image = new Image(CAR_IMAGE_LOC_2);
         car2 = new ImageView(car2Image);
@@ -96,7 +99,7 @@ public class CharacterMovement extends Application {
             @Override
             public void handle(long now) {
                 int dx = 0, dy = 0;
-
+                
                 if (goNorth) dy -= 1;
                 if (goSouth) dy += 1;
                 if (goEast)  dx += 1;
@@ -104,10 +107,16 @@ public class CharacterMovement extends Application {
                 if (running) { dx *= 3; dy *= 3; }
 
                 moveCarBy(dx, dy);
-                giveChase();
-                if isTouching(car, car2) {
-                	car.relocate((W / 1.3, H / 2);
+                double distance = giveChase();
+                if (distance <= 75.0){
+                	counter++;
                 }
+                if (counter >= 5000) {
+                	
+                }
+//                if (isTouching(car, car2)) {
+//                	car.relocate((W / 1.3),  (H / 2));
+//                }
                 
             }
         };
@@ -154,19 +163,21 @@ public class CharacterMovement extends Application {
         }
     }
     //Method used to calculate how far the second car needs to move to chase the player
-    //Method then relocates second car accordingly.
-    private void giveChase() {
+    //Method then relocates second car accordingly. Returns the direct distance between the center points as well
+    private double giveChase() {
     	double C2x = car2.getLayoutX();
     	double C2y = car2.getLayoutY();
     	double C1x = car.getLayoutX();
     	double C1y = car.getLayoutY();
     	double xDistance = C1x - C2x;
     	double yDistance = C1y - C2y;
+    	double compDistance = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
     	car2.relocate(C2x + (xDistance/ 250), C2y + (yDistance / 250));
+    	return compDistance;
     }
     //Helper method for isTouching(), which determines the minX, minY, maxX, and maxY
     //of the specified car, and inserts them in an array for easy use by isTouching()
-    private double[] getBounds(ImageView car) {
+    private double[] getBounds(Node car) {
     	double[] boundsArray = new double[3];
     	double halfX = car.getBoundsInLocal().getWidth() / 2;
     	double halfY = car.getBoundsInLocal().getHeight() / 2;
@@ -179,7 +190,7 @@ public class CharacterMovement extends Application {
     }
     //Method designed to determine if the two cars are touching. 
     //if touching return true, else return false
-     private boolean isTouching(ImageView car, ImageView car2) {
+     private boolean isTouching(Node car, Node car2) {
     	 double[] carBounds = getBounds(car);
     	 double[] car2Bounds = getBounds(car2);
     	 if(carBounds[3] < car2Bounds[0] || carBounds[0] > car2Bounds[3]) {
