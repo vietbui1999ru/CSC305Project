@@ -32,10 +32,10 @@ public class CharacterMovement extends Application {
     		"https://i.imgur.com/n7HbHdB.png";
     
     private Image carImage;
-    private Node car;
+    private playerCar car;
     
     private Image car2Image;
-    private Node car2;
+    private enemyCar car2;
     
     private Image raceImage;
     private Node race;
@@ -48,11 +48,11 @@ public class CharacterMovement extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         carImage = new Image(CAR_IMAGE_LOC);
-        car = new ImageView(carImage);
+        car = new playerCar(carImage);
         
         
         car2Image = new Image(CAR_IMAGE_LOC_2);
-        car2 = new ImageView(car2Image);
+        car2 = new enemyCar(car2Image);
         
         raceImage = new Image(SCENE_IMAGE_LOC);
         race = new ImageView(raceImage);
@@ -63,7 +63,7 @@ public class CharacterMovement extends Application {
         Group game = new Group(race, car, car2, pause);
       
         moveCarTo(W / 1.3, H / 2);
-        moveCarTo2(W / 6, H / 2);
+        car2.relocate(W / 6, H / 2);
         Scene scene = new Scene(game, W, H);
         
         scene.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -107,12 +107,21 @@ public class CharacterMovement extends Application {
                 if (running) { dx *= 3; dy *= 3; }
 
                 moveCarBy(dx, dy);
-                double distance = giveChase();
-                if (distance <= 75.0){
-                	counter++;
-                }
-                if (counter >= 5000) {
-                	
+                if(!car.getHacked()) {
+                	double distance = giveChase();
+                		if (distance <= 75.0){
+                			counter++;
+                		}
+                		if (counter >= 5000) {
+                			(car2).hack(car);
+                		}
+                } else {
+                	crash(car);
+                	reCenter(car2);
+                	if(car.getLayoutX() == 0 || car.getLayoutX() == W) {
+                		car.relocate(W / 1.3, H / 2);
+                		car.setHacked(false);
+                	}
                 }
 //                if (isTouching(car, car2)) {
 //                	car.relocate((W / 1.3),  (H / 2));
@@ -150,18 +159,30 @@ public class CharacterMovement extends Application {
             car.relocate(x - cx, y - cy);
         }
     }
-    
-    private void moveCarTo2(double x, double y) {
-        final double cx = car2.getBoundsInLocal().getWidth()  / 2;
-        final double cy = car2.getBoundsInLocal().getHeight() / 2;
-
-        if (x - cx >= 0 &&
-            x + cx <= W &&
-            y - cy >= 0 &&
-            y + cy <= H) {
-            car2.relocate(x - cx, y - cy);
-        }
+    //Method designed to crash the player car as a result of being hacked. May be changed as other hacking condtions are designed/implemented
+    private void crash(playerCar car) {
+    	double xPosition = car.getLayoutX();
+    	double half = W / 2;
+    	double goal;
+    	if(xPosition <= half) {
+    		goal = 0;
+    	} else {
+    		goal = 956;
+    	}
+    	double borderDistance = goal - xPosition;
+    	car.relocate(xPosition + (borderDistance / 100), car.getLayoutY());
     }
+    
+    private void reCenter(enemyCar car) {
+    	double xPosition = car.getLayoutX();
+    	double yPosition = car.getLayoutY();
+    	double xGoal = W / 6;
+    	double yGoal = H / 2;
+    	double xDistance = xGoal - xPosition;
+    	double yDistance = yGoal - yPosition; 
+    	car.relocate(xPosition + (xDistance / 100), yPosition + (yDistance / 100));
+    }
+    
     //Method used to calculate how far the second car needs to move to chase the player
     //Method then relocates second car accordingly. Returns the direct distance between the center points as well
     private double giveChase() {
