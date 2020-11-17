@@ -2,6 +2,8 @@ package application;
 
 
 
+import java.util.Random;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.event.EventHandler;
@@ -99,15 +101,21 @@ public class CharacterMovement extends Application {
             @Override
             public void handle(long now) {
                 int dx = 0, dy = 0;
-                
-                if (goNorth) dy -= 1;
-                if (goSouth) dy += 1;
-                if (goEast)  dx += 1;
-                if (goWest)  dx -= 1;
-                if (running) { dx *= 3; dy *= 3; }
-
+                if(!car.checkHacked()) {
+                	if (goNorth) dy -= 1;
+                	if (goSouth) dy += 1;
+                	if (goEast)  dx += 1;
+                	if (goWest)  dx -= 1;
+                	if (running) { dx *= 3; dy *= 3; }
+                } else {
+                	if (goNorth) dy += 1;
+                	if (goSouth) dy -= 1;
+                	if (goEast)  dx -= 1;
+                	if (goWest)  dx += 1;
+                	if (running) { dx *= 3; dy *= 3; }
+                }
                 moveCarBy(dx, dy);
-                if(!car.getHacked()) {
+                if(!car.checkHacked()) {
                 	double distance = giveChase();
                 		if (distance <= 75.0){
                 			counter++;
@@ -147,7 +155,6 @@ public class CharacterMovement extends Application {
     }
     
 
-
     private void moveCarTo(double x, double y) {
         final double cx = car.getBoundsInLocal().getWidth()  / 2;
         final double cy = car.getBoundsInLocal().getHeight() / 2;
@@ -170,7 +177,11 @@ public class CharacterMovement extends Application {
     		goal = 956;
     	}
     	double borderDistance = goal - xPosition;
-    	car.relocate(xPosition + (borderDistance / 100), car.getLayoutY());
+    	int max = 300;
+    	int min = 100;
+    	Random randomNum = new Random();
+    	int randDistance = min + randomNum.nextInt(max); 
+    	car.relocate(xPosition + (borderDistance / randDistance), car.getLayoutY());
     }
     
     private void reCenter(enemyCar car) {
@@ -185,6 +196,7 @@ public class CharacterMovement extends Application {
     
     //Method used to calculate how far the second car needs to move to chase the player
     //Method then relocates second car accordingly. Returns the direct distance between the center points as well
+    //Needs to be modified to maintain distance from playerCar bc it's way easier if they never touch. WIP at the moment.
     private double giveChase() {
     	double C2x = car2.getLayoutX();
     	double C2y = car2.getLayoutY();
@@ -192,6 +204,16 @@ public class CharacterMovement extends Application {
     	double C1y = car.getLayoutY();
     	double xDistance = C1x - C2x;
     	double yDistance = C1y - C2y;
+    	if(xDistance >= 0) {
+    		xDistance = xDistance - 45;
+    	} else {
+    		xDistance = xDistance + 45;
+    	}
+    	if(yDistance >= 0) {
+    		xDistance = yDistance - 45;
+    	} else {
+    		yDistance = yDistance + 45;
+    	}
     	double compDistance = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
     	car2.relocate(C2x + (xDistance/ 250), C2y + (yDistance / 250));
     	return compDistance;

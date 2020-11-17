@@ -4,25 +4,26 @@ import javafx.scene.image.Image;
 
 import javafx.scene.image.ImageView;
 
-public class enemyCar extends ImageView{
-	// onAttack is designed to be the switch for the computer car/cars to either come
-	// close but not touch the player or to run them off the road! If true, ATTACK!
-	private boolean onAttack;
+public class enemyCar extends ImageView implements hackable{
+	private boolean isHacked;
 	public enemyCar(Image carPic) {
 		super(carPic);
-		this.onAttack = false;
+		isHacked = false;
 	}
 
-	public boolean getAttack() {
-		return this.onAttack;
-	}
-
-	public void setAttack(boolean input) {
-		this.onAttack = input;
-	}
 	//Method that "hacks" the player car, provided that the proper conditions in main have been met. The hack begins! 
 	public void hack(playerCar target) {
 		target.setHacked(true);
-		this.setAttack(true);
+	}
+
+	@Override
+	public void setHacked(boolean status) {
+		isHacked = status;
+		
+	}
+
+	@Override
+	public boolean checkHacked() {
+		return this.isHacked;
 	}
 }
