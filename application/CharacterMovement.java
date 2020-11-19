@@ -167,17 +167,22 @@ public class CharacterMovement extends Application {
                 moveCarBy(dx, dy);
                 if(!car.checkHacked()) {
                 	double distance = giveChase();
-                		if (distance <= 75.0){
+                		if (distance <= 100.0){
                 			counter++;
                 		}
-                		if (counter >= 5000) {
+                		if (counter >= 1000) {
                 			(car2).hack(car);
+                			counter = 0;
                 		}
                 } else {
                 	crash(car);
                 	reCenter(car2);
-                	if(car.getLayoutX() == 0 || car.getLayoutX() == W) {
+                	counter++;
+                	if(car.getLayoutX() <= 50 || car.getLayoutX() >= 906) {
+                		car.setHacked(false);
                 		car.relocate(W / 1.3, H / 2);
+                	}
+                	if(counter >= 500) {
                 		car.setHacked(false);
                 	}
                 }
