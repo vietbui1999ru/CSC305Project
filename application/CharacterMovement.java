@@ -1,19 +1,23 @@
 package application;
 
-import java.util.Random;
 
+import java.util.Random;
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
+import javafx.animation.Interpolator;
+import javafx.animation.ParallelTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.image.*;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 /**
  * Hold down an arrow key to have your car drive around the screen. Make sure to
@@ -30,7 +34,7 @@ public class CharacterMovement extends Application {
 
 //    blue car - https://i.imgur.com/9bLztIl.png
 
-	private static final String SCENE_IMAGE_LOC = "https://i.imgur.com/zaP4Fe7.png";
+	private static final String SCENE_IMAGE_LOC = "https://i.imgur.com/Vh3pzrL.png";
 
 //    private static final String PAUSE_LOC = 
 //    		"https://i.imgur.com/n7HbHdB.png";
@@ -47,7 +51,7 @@ public class CharacterMovement extends Application {
 //    private Image pauseImage;
 //    private Node pause;
 
-// a surprise tool that will help us later...
+	// a surprise tool that will help us later...
 	int hackCounter = 0;
 	boolean running, goNorth, goSouth, goEast, goWest;
 
@@ -64,20 +68,31 @@ public class CharacterMovement extends Application {
 		// creating the game background
 		raceImage = new Image(SCENE_IMAGE_LOC);
 		race = new ImageView(raceImage);
-
+		
 //        pauseImage = new Image(PAUSE_LOC);
 //        pause = new ImageView(pauseImage);
 
-		// creating the game scene
+		// creating the game group
 		Group game = new Group(race, car, car2);
 
+		// moving cars to proper place and creating the game scene
 		moveCarTo(W / 1.3, H / 2);
 		car2.relocate(W / 6, H / 2);
 		Scene gameScene = new Scene(game, W, H);
-
+		
+		// it's been 84 years to figure this out...
+	    // translation to scroll background vertically
+	    TranslateTransition scrollingBackground = new TranslateTransition(Duration.seconds(1), race);
+	    scrollingBackground.setFromY(-740);
+	    scrollingBackground.setToY(0.0);
+	    scrollingBackground.setInterpolator(Interpolator.LINEAR);
+	    scrollingBackground.setCycleCount(Animation.INDEFINITE);
+	    ParallelTransition scrollingBackgroundTransition = new ParallelTransition(scrollingBackground);
+	    scrollingBackgroundTransition.play();
+		
 		// creating the title screen with image background
 		stage.setTitle("DRIFT STAGE");
-		Pane root1 = new Pane();
+		Group root1 = new Group();
 		ImageView titleScreenBackground = new ImageView(getClass().getResource("titlescreen.png").toExternalForm());
 		root1.getChildren().add(titleScreenBackground);
 
@@ -92,7 +107,7 @@ public class CharacterMovement extends Application {
 		Scene titleScreen = new Scene(root1, 956, 740);
 
 		// creating the game over screen with image background
-		Pane root2 = new Pane();
+		Group root2 = new Group();
 		ImageView gameOverBackground = new ImageView(getClass().getResource("gameoverscreen.jpg").toExternalForm());
 		root2.getChildren().add(gameOverBackground);
 
@@ -110,9 +125,8 @@ public class CharacterMovement extends Application {
 //        MediaPlayer player = new MediaPlayer(music);
 //        MediaView mediaView = new MediaView(player);
 //        root2.getChildren().add(mediaView);
-
-		Scene gameOverScreen = new Scene(root2, 956, 740);
 //        player.play();
+		Scene gameOverScreen = new Scene(root2, 956, 740);
 
 		gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
@@ -181,6 +195,7 @@ public class CharacterMovement extends Application {
 						dx *= 3;
 						dy *= 3;
 					}
+					
 					// flips controls if playerCar is hacked
 				} else {
 					if (goNorth)
@@ -196,6 +211,7 @@ public class CharacterMovement extends Application {
 						dy *= 3;
 					}
 				}
+				
 				moveCarBy(dx, dy);
 				if (!car.checkHacked()) {
 					double distance = giveChase();
@@ -208,10 +224,12 @@ public class CharacterMovement extends Application {
 						(car2).hack(car);
 						hackCounter = 0;
 					}
+					
 				} else {
 					crash(car);
 					reCenter(car2);
 					hackCounter++;
+					
 					// checks if car has crashed (game over condition)
 					if (car.getLayoutX() <= 50 || car.getLayoutX() >= 906) {
 						// Ideally this next section will properly play the game-over screen, but no
@@ -219,6 +237,7 @@ public class CharacterMovement extends Application {
 						stage.setScene(gameOverScreen);
 						stage.show();
 					}
+					
 					// resets hacked status if the player manages not to crash for long enough,
 					// allowing game to continue w/o game over screen
 					if (hackCounter >= 500) {
@@ -255,16 +274,18 @@ public class CharacterMovement extends Application {
 	}
 
 	// Method designed to crash the player car as a result of being hacked. May be
-	// changed as other hacking condtions are designed/implemented
+	// changed as other hacking conditions are designed/implemented
 	private void crash(playerCar car) {
 		double xPosition = car.getLayoutX();
 		double half = W / 2;
 		double goal;
+		
 		if (xPosition <= half) {
 			goal = 0;
 		} else {
 			goal = 956;
 		}
+		
 		double borderDistance = goal - xPosition;
 		int max = 300;
 		int min = 100;
@@ -276,10 +297,13 @@ public class CharacterMovement extends Application {
 	private void reCenter(enemyCar car) {
 		double xPosition = car.getLayoutX();
 		double yPosition = car.getLayoutY();
+		
 		double xGoal = W / 6;
 		double yGoal = H / 2;
+		
 		double xDistance = xGoal - xPosition;
 		double yDistance = yGoal - yPosition;
+		
 		car.relocate(xPosition + (xDistance / 100), yPosition + (yDistance / 100));
 	}
 
@@ -296,6 +320,7 @@ public class CharacterMovement extends Application {
 		double C1y = car.getLayoutY();
 		double xDistance = C1x - C2x;
 		double yDistance = C1y - C2y;
+		
 		if (xDistance >= 0) {
 			xDistance = xDistance - 45;
 		} else {
@@ -306,6 +331,7 @@ public class CharacterMovement extends Application {
 		} else {
 			yDistance = yDistance + 45;
 		}
+		
 		double compDistance = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
 		car2.relocate(C2x + (xDistance / 200), C2y + (yDistance / 200));
 		return compDistance;
