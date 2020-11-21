@@ -3,4 +3,5 @@ red car - "https://i.imgur.com/V4G07Q8.png"
 green car - "https://i.imgur.com/MrFg7OU.png"
 blue car - "https://i.imgur.com/9bLztIl.png"
     
-new background (i took off the pause button and speedometer) - "https://i.imgur.com/Vh3pzrL.png"
+new background (i took off the pause button and speedometer, and stretched the image to properly scroll) - 
+"https://i.imgur.com/Vh3pzrL.png"
