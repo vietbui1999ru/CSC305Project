@@ -1,7 +1,16 @@
 package application;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
+
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
 import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.Interpolator;
@@ -26,27 +35,31 @@ import javafx.util.Duration;
  */
 public class CharacterMovement extends Application {
 
-	private static final double W = 956, H = 740;
+	private static final double W = 800, H = 600;
 
 	private static final String CAR_IMAGE_LOC = "https://i.imgur.com/V4G07Q8.png";
-
 	private static final String CAR_IMAGE_LOC_2 = "https://i.imgur.com/MrFg7OU.png";
-
 //    blue car - https://i.imgur.com/9bLztIl.png
 
-	private static final String SCENE_IMAGE_LOC = "https://i.imgur.com/Vh3pzrL.png";
-
+	private static final String RACETRACK_IMAGE_LOC = "https://i.imgur.com/ZLTZyqQ.png";
+	private static final String TITLE_IMAGE_LOC = "https://i.imgur.com/XOeWkjO.png";
+	private static final String GAMEOVER_IMAGE_LOC = "https://i.imgur.com/VRim9Ll.png";
+	
 //    private static final String PAUSE_LOC = 
 //    		"https://i.imgur.com/n7HbHdB.png";
 
-	private Image carImage;
-	private playerCar car;
-
+	private Image car1Image;
+	private playerCar playerCar;
 	private Image car2Image;
-	private enemyCar car2;
+	private enemyCar enemyCar;
 
-	private Image raceImage;
-	private Node race;
+	private Image racetrackImage;
+	private ImageView racetrack;
+	
+	private Image titleImage;
+	private ImageView titleScreen;
+	private Image gameoverImage;
+	private ImageView gameoverScreen;
 
 //    private Image pauseImage;
 //    private Node pause;
@@ -59,31 +72,31 @@ public class CharacterMovement extends Application {
 	public void start(Stage stage) throws Exception {
 
 		// creating the car images
-		carImage = new Image(CAR_IMAGE_LOC);
-		car = new playerCar(carImage);
+		car1Image = new Image(CAR_IMAGE_LOC);
+		playerCar = new playerCar(car1Image);
 
 		car2Image = new Image(CAR_IMAGE_LOC_2);
-		car2 = new enemyCar(car2Image);
+		enemyCar = new enemyCar(car2Image);
 
 		// creating the game background
-		raceImage = new Image(SCENE_IMAGE_LOC);
-		race = new ImageView(raceImage);
+		racetrackImage = new Image(RACETRACK_IMAGE_LOC);
+		racetrack = new ImageView(racetrackImage);
 		
 //        pauseImage = new Image(PAUSE_LOC);
 //        pause = new ImageView(pauseImage);
 
 		// creating the game group
-		Group game = new Group(race, car, car2);
+		Group game = new Group(racetrack, playerCar, enemyCar);
 
 		// moving cars to proper place and creating the game scene
 		moveCarTo(W / 1.3, H / 2);
-		car2.relocate(W / 6, H / 2);
+		enemyCar.relocate(W / 6, H / 2);
 		Scene gameScene = new Scene(game, W, H);
 		
 		// it's been 84 years to figure this out...
 	    // translation to scroll background vertically
-	    TranslateTransition scrollingBackground = new TranslateTransition(Duration.seconds(1), race);
-	    scrollingBackground.setFromY(-740);
+	    TranslateTransition scrollingBackground = new TranslateTransition(Duration.seconds(1), racetrack);
+	    scrollingBackground.setFromY(-600.0);
 	    scrollingBackground.setToY(0.0);
 	    scrollingBackground.setInterpolator(Interpolator.LINEAR);
 	    scrollingBackground.setCycleCount(Animation.INDEFINITE);
@@ -92,42 +105,41 @@ public class CharacterMovement extends Application {
 		
 		// creating the title screen with image background
 		stage.setTitle("DRIFT STAGE");
-		Group root1 = new Group();
-		ImageView titleScreenBackground = new ImageView(getClass().getResource("titlescreen.png").toExternalForm());
-		root1.getChildren().add(titleScreenBackground);
-
+		
+		titleImage = new Image(TITLE_IMAGE_LOC);
+		titleScreen = new ImageView(titleImage);
+		Group title = new Group(titleScreen);
+		
 		// creating the play button and adding it into the title screen
 		Button startButton = new Button("PLAY");
-		startButton.setMinSize(200, 100);
-		startButton.setLayoutX(335);
-		startButton.setLayoutY(550);
+		startButton.setMinSize(100, 100);
+		startButton.setLayoutX(300);
+		startButton.setLayoutY(420);
 		startButton.setStyle("-fx-background-color: #ee2364;" + "-fx-font-size: 40;" + "-fx-text-fill: white;");
 		startButton.setOnAction(e -> stage.setScene(gameScene));
-		root1.getChildren().add(startButton);
-		Scene titleScreen = new Scene(root1, 956, 740);
+		title.getChildren().add(startButton);
+		
+		Scene titleScreenScene = new Scene(title, 800, 600);
 
 		// creating the game over screen with image background
-		Group root2 = new Group();
-		ImageView gameOverBackground = new ImageView(getClass().getResource("gameoverscreen.jpg").toExternalForm());
-		root2.getChildren().add(gameOverBackground);
+		gameoverImage = new Image(GAMEOVER_IMAGE_LOC);
+		gameoverScreen = new ImageView(gameoverImage);
+		Group gameover = new Group(gameoverScreen);
 
 		// creating the try again button and adding it into the game over screen
 		Button gameOverButton = new Button("TRY AGAIN");
-		gameOverButton.setMinSize(200, 100);
-		gameOverButton.setLayoutX(345);
-		gameOverButton.setLayoutY(550);
+		gameOverButton.setMinSize(100, 100);
+		gameOverButton.setLayoutX(275);
+		gameOverButton.setLayoutY(350);
 		gameOverButton.setStyle("-fx-background-color: white;" + "-fx-font-size: 40;" + "-fx-text-fill: blue;");
-		gameOverButton.setOnAction(e -> stage.setScene(titleScreen));
-		root2.getChildren().add(gameOverButton);
-
-		// creating the music and failing spectacularly
-//		Media music = new Media(getClass().getResource("music.mp3").toExternalForm()); 
-//        MediaPlayer player = new MediaPlayer(music);
-//        MediaView mediaView = new MediaView(player);
-//        root2.getChildren().add(mediaView);
-//        player.play();
-		Scene gameOverScreen = new Scene(root2, 956, 740);
-
+		gameOverButton.setOnAction(e -> stage.setScene(titleScreenScene));
+		gameover.getChildren().add(gameOverButton);
+		
+		Scene gameoverScreenScene = new Scene(gameover, 800, 600);
+		
+		// call to play music?
+		music("Brave Heart.wav");
+		
 		gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
 			public void handle(KeyEvent event) {
@@ -175,14 +187,14 @@ public class CharacterMovement extends Application {
 		});
 
 		// should display title screen first in latest revision
-		stage.setScene(titleScreen);
+		stage.setScene(titleScreenScene);
 		stage.show();
 
 		AnimationTimer timer = new AnimationTimer() {
 			@Override
 			public void handle(long now) {
 				int dx = 0, dy = 0;
-				if (!car.checkHacked()) {
+				if (!playerCar.checkHacked()) {
 					if (goNorth)
 						dy -= 1;
 					if (goSouth)
@@ -213,7 +225,7 @@ public class CharacterMovement extends Application {
 				}
 				
 				moveCarBy(dx, dy);
-				if (!car.checkHacked()) {
+				if (!playerCar.checkHacked()) {
 					double distance = giveChase();
 					// checks to see if player is within hacking distance, and adds to hacking
 					// counter if so.
@@ -221,27 +233,27 @@ public class CharacterMovement extends Application {
 						hackCounter++;
 					}
 					if (hackCounter >= 1000) {
-						(car2).hack(car);
+						(enemyCar).hack(playerCar);
 						hackCounter = 0;
 					}
 					
 				} else {
-					crash(car);
-					reCenter(car2);
+					crash(playerCar);
+					reCenter(enemyCar);
 					hackCounter++;
 					
 					// checks if car has crashed (game over condition)
-					if (car.getLayoutX() <= 50 || car.getLayoutX() >= 906) {
+					if (playerCar.getLayoutX() <= 50 || playerCar.getLayoutX() >= 906) {
 						// Ideally this next section will properly play the game-over screen, but no
 						// promises.
-						stage.setScene(gameOverScreen);
+						stage.setScene(gameoverScreenScene);
 						stage.show();
 					}
 					
 					// resets hacked status if the player manages not to crash for long enough,
 					// allowing game to continue w/o game over screen
 					if (hackCounter >= 500) {
-						car.setHacked(false);
+						playerCar.setHacked(false);
 					}
 				}
 			}
@@ -251,32 +263,64 @@ public class CharacterMovement extends Application {
 
 	}
 
+	// method to play music from file?
+	private void music(String musicLocation) {
+
+        try {
+            //take WAV file as input for background music
+            File musicPath = new File(musicLocation);
+            //checks if the music file exists in project's path
+            if(musicPath.exists()) {
+                System.out.println("The game is playing: " + musicPath);
+                AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
+                Clip clip = AudioSystem.getClip();
+                clip.start();
+
+                clip.loop(Clip.LOOP_CONTINUOUSLY);
+            }
+            else {
+                System.out.println("Can't find file");
+            }
+
+         } catch (UnsupportedAudioFileException ex) {
+                System.out.println("The specified audio file is not supported.");
+                ex.printStackTrace();
+            } catch (LineUnavailableException ex) {
+                System.out.println("Audio line for playing back is unavailable.");
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                System.out.println("Error playing the audio file.");
+                ex.printStackTrace();
+            }
+
+    }
+	
 	private void moveCarBy(int dx, int dy) {
 		if (dx == 0 && dy == 0)
 			return;
 
-		final double cx = car.getBoundsInLocal().getWidth() / 2;
-		final double cy = car.getBoundsInLocal().getHeight() / 2;
+		final double cx = playerCar.getBoundsInLocal().getWidth() / 2;
+		final double cy = playerCar.getBoundsInLocal().getHeight() / 2;
 
-		double x = cx + car.getLayoutX() + dx;
-		double y = cy + car.getLayoutY() + dy;
+		double x = cx + playerCar.getLayoutX() + dx;
+		double y = cy + playerCar.getLayoutY() + dy;
 
 		moveCarTo(x, y);
 	}
 
 	private void moveCarTo(double x, double y) {
-		final double cx = car.getBoundsInLocal().getWidth() / 2;
-		final double cy = car.getBoundsInLocal().getHeight() / 2;
+		final double cx = playerCar.getBoundsInLocal().getWidth() / 2;
+		final double cy = playerCar.getBoundsInLocal().getHeight() / 2;
 
 		if (x - cx >= 0 && x + cx <= W && y - cy >= 0 && y + cy <= H) {
-			car.relocate(x - cx, y - cy);
+			playerCar.relocate(x - cx, y - cy);
 		}
 	}
 
 	// Method designed to crash the player car as a result of being hacked. May be
 	// changed as other hacking conditions are designed/implemented
-	private void crash(playerCar car) {
-		double xPosition = car.getLayoutX();
+	private void crash(playerCar playerCar) {
+		double xPosition = playerCar.getLayoutX();
 		double half = W / 2;
 		double goal;
 		
@@ -291,12 +335,12 @@ public class CharacterMovement extends Application {
 		int min = 100;
 		Random randomNum = new Random();
 		int randDistance = min + randomNum.nextInt(max);
-		car.relocate(xPosition + (borderDistance / randDistance), car.getLayoutY());
+		playerCar.relocate(xPosition + (borderDistance / randDistance), playerCar.getLayoutY());
 	}
 
-	private void reCenter(enemyCar car) {
-		double xPosition = car.getLayoutX();
-		double yPosition = car.getLayoutY();
+	private void reCenter(enemyCar enemyCar) {
+		double xPosition = enemyCar.getLayoutX();
+		double yPosition = enemyCar.getLayoutY();
 		
 		double xGoal = W / 6;
 		double yGoal = H / 2;
@@ -304,7 +348,7 @@ public class CharacterMovement extends Application {
 		double xDistance = xGoal - xPosition;
 		double yDistance = yGoal - yPosition;
 		
-		car.relocate(xPosition + (xDistance / 100), yPosition + (yDistance / 100));
+		enemyCar.relocate(xPosition + (xDistance / 100), yPosition + (yDistance / 100));
 	}
 
 	// Method used to calculate how far the second car needs to move to chase the
@@ -314,10 +358,10 @@ public class CharacterMovement extends Application {
 	// Needs to be modified to maintain distance from playerCar bc it's way easier
 	// if they never touch. WIP at the moment.
 	private double giveChase() {
-		double C2x = car2.getLayoutX();
-		double C2y = car2.getLayoutY();
-		double C1x = car.getLayoutX();
-		double C1y = car.getLayoutY();
+		double C2x = enemyCar.getLayoutX();
+		double C2y = enemyCar.getLayoutY();
+		double C1x = playerCar.getLayoutX();
+		double C1y = playerCar.getLayoutY();
 		double xDistance = C1x - C2x;
 		double yDistance = C1y - C2y;
 		
@@ -333,7 +377,7 @@ public class CharacterMovement extends Application {
 		}
 		
 		double compDistance = Math.sqrt((xDistance * xDistance) + (yDistance * yDistance));
-		car2.relocate(C2x + (xDistance / 200), C2y + (yDistance / 200));
+		enemyCar.relocate(C2x + (xDistance / 200), C2y + (yDistance / 200));
 		return compDistance;
 	}
 
