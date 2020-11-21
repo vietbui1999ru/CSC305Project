@@ -45,6 +45,8 @@ public class CharacterMovement extends Application {
 	private static final String TITLE_IMAGE_LOC = "https://i.imgur.com/XOeWkjO.png";
 	private static final String GAMEOVER_IMAGE_LOC = "https://i.imgur.com/VRim9Ll.png";
 	
+	//gets music file for game's music loop (must convert mp3 file to wav file first)
+	private static final String MEDIA_URL = "music.wav";
 //    private static final String PAUSE_LOC = 
 //    		"https://i.imgur.com/n7HbHdB.png";
 
@@ -138,7 +140,10 @@ public class CharacterMovement extends Application {
 		Scene gameoverScreenScene = new Scene(gameover, 800, 600);
 		
 		// call to play music?
-		music("Brave Heart.wav");
+		//music("Brave Heart.wav");
+		
+		//Yes, call to play music. - Viet
+		music(MEDIA_URL);
 		
 		gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
 			@Override
@@ -274,8 +279,9 @@ public class CharacterMovement extends Application {
                 System.out.println("The game is playing: " + musicPath);
                 AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
                 Clip clip = AudioSystem.getClip();
+		clip.open(audioInput);
                 clip.start();
-
+		
                 clip.loop(Clip.LOOP_CONTINUOUSLY);
             }
             else {
