@@ -8,4 +8,6 @@ new background (i took off the pause button and speedometer, and stretched the i
 
 game over screen - "https://i.imgur.com/VRim9Ll.png"
 
-title screen - "https://i.imgur.com/XOeWkjO.png"
+title screen - "https://i.imgur.com/Ma5LQ7t.png"
+
+directions - "https://i.imgur.com/kRhNqxI.png"
