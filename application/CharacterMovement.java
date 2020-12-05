@@ -39,11 +39,12 @@ public class CharacterMovement extends Application {
 //    blue car - https://i.imgur.com/9bLztIl.png
 
 	private static final String RACETRACK_IMAGE_LOC = "https://i.imgur.com/ZLTZyqQ.png";
-	private static final String TITLE_IMAGE_LOC = "https://i.imgur.com/XOeWkjO.png";
+	private static final String TITLE_IMAGE_LOC = "https://i.imgur.com/Ma5LQ7t.png";
 	private static final String GAMEOVER_IMAGE_LOC = "https://i.imgur.com/VRim9Ll.png";
+	private static final String DIRECTIONS_IMAGE_LOC = "https://i.imgur.com/kRhNqxI.png";
 	
-	//gets music file for game's music loop (must convert mp3 file to wav file first)
 	private static final String MEDIA_URL = "music.wav";
+	
 //    private static final String PAUSE_LOC = 
 //    		"https://i.imgur.com/n7HbHdB.png";
 
@@ -59,6 +60,9 @@ public class CharacterMovement extends Application {
 	private ImageView titleScreen;
 	private Image gameoverImage;
 	private ImageView gameoverScreen;
+	
+	private Image directionsImage;
+	private ImageView directions;
 
 //    private Image pauseImage;
 //    private Node pause;
@@ -93,7 +97,7 @@ public class CharacterMovement extends Application {
 		Scene gameScene = new Scene(game, W, H);
 		
 		// it's been 84 years to figure this out...
-	    // translation to scroll background vertically
+	    // transition to scroll background vertically
 	    TranslateTransition scrollingBackground = new TranslateTransition(Duration.seconds(1), racetrack);
 	    scrollingBackground.setFromY(-600.0);
 	    scrollingBackground.setToY(0.0);
@@ -107,18 +111,39 @@ public class CharacterMovement extends Application {
 		
 		titleImage = new Image(TITLE_IMAGE_LOC);
 		titleScreen = new ImageView(titleImage);
-		Group title = new Group(titleScreen);
+		directionsImage = new Image(DIRECTIONS_IMAGE_LOC);
+		directions = new ImageView(directionsImage);
+		
+		Group title = new Group(titleScreen, directions);
 		
 		// creating the play button and adding it into the title screen
 		Button startButton = new Button("PLAY");
-		startButton.setMinSize(100, 100);
-		startButton.setLayoutX(300);
-		startButton.setLayoutY(420);
-		startButton.setStyle("-fx-background-color: #ee2364;" + "-fx-font-size: 40;" + "-fx-text-fill: white;");
+		startButton.setMinSize(150, 45);
+		startButton.setLayoutX(320);
+		startButton.setLayoutY(370);
+		startButton.setStyle("-fx-background-color: #ee2364;" + "-fx-font-size: 30;" + "-fx-text-fill: white;");
 		startButton.setOnAction(e -> stage.setScene(gameScene));
-		title.getChildren().add(startButton);
+		
+		// creating the second quit button and adding it into the title screen
+		Button quitButton = new Button("QUIT");
+		quitButton.setMinSize(100, 45);
+		quitButton.setLayoutX(340);
+		quitButton.setLayoutY(450);
+		quitButton.setStyle("-fx-background-color: #ee2364;" + "-fx-font-size: 30;" + "-fx-text-fill: white;");
+		quitButton.setOnAction(e -> stage.close());
+		title.getChildren().addAll(startButton, quitButton);
 		
 		Scene titleScreenScene = new Scene(title, 800, 600);
+		
+		// transition to scroll directions vertically
+		directions.setX(550);
+		TranslateTransition scrollingDirections = new TranslateTransition(Duration.seconds(10), directions);
+	    scrollingDirections.setFromY(0);
+	    scrollingDirections.setToY(-1200.0);
+	    scrollingDirections.setInterpolator(Interpolator.LINEAR);
+	    scrollingDirections.setCycleCount(Animation.INDEFINITE);
+	    ParallelTransition scrollingDirectionsTransition = new ParallelTransition(scrollingDirections);
+	    scrollingDirectionsTransition.play();
 
 		// creating the game over screen with image background
 		gameoverImage = new Image(GAMEOVER_IMAGE_LOC);
@@ -129,17 +154,22 @@ public class CharacterMovement extends Application {
 		Button gameOverButton = new Button("TRY AGAIN");
 		gameOverButton.setMinSize(100, 100);
 		gameOverButton.setLayoutX(275);
-		gameOverButton.setLayoutY(350);
+		gameOverButton.setLayoutY(300);
 		gameOverButton.setStyle("-fx-background-color: white;" + "-fx-font-size: 40;" + "-fx-text-fill: blue;");
 		gameOverButton.setOnAction(e -> stage.setScene(titleScreenScene));
-		gameover.getChildren().add(gameOverButton);
+		
+		// creating the second quit button and adding it into the game over screen
+		Button quit2Button = new Button("QUIT");
+		quit2Button.setMinSize(80, 80);
+		quit2Button.setLayoutX(325);
+		quit2Button.setLayoutY(430);
+		quit2Button.setStyle("-fx-background-color: white;" + "-fx-font-size: 40;" + "-fx-text-fill: blue;");
+		quit2Button.setOnAction(e -> stage.close());
+		gameover.getChildren().addAll(gameOverButton, quit2Button);
 		
 		Scene gameoverScreenScene = new Scene(gameover, 800, 600);
 		
-		// call to play music?
-		//music("Brave Heart.wav");
-		
-		//Yes, call to play music. - Viet
+		// call to play music
 		music(MEDIA_URL);
 		
 		gameScene.setOnKeyPressed(new EventHandler<KeyEvent>() {
@@ -265,20 +295,20 @@ public class CharacterMovement extends Application {
 
 	}
 
-	// method to play music from file?
+	// method to play music from file
 	private void music(String musicLocation) {
 
         try {
             //take WAV file as input for background music
             File musicPath = new File(musicLocation);
+            
             //checks if the music file exists in project's path
             if(musicPath.exists()) {
                 System.out.println("The game is playing: " + musicPath);
                 AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
                 Clip clip = AudioSystem.getClip();
-		clip.open(audioInput);
+                clip.open(audioInput);
                 clip.start();
-		
                 clip.loop(Clip.LOOP_CONTINUOUSLY);
             }
             else {
@@ -295,7 +325,6 @@ public class CharacterMovement extends Application {
                 System.out.println("Error playing the audio file.");
                 ex.printStackTrace();
             }
-
     }
 	
 	private void moveCarBy(int dx, int dy) {
