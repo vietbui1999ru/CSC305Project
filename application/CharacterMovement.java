@@ -36,17 +36,14 @@ public class CharacterMovement extends Application {
 
 	private static final String CAR_IMAGE_LOC = "https://i.imgur.com/V4G07Q8.png";
 	private static final String CAR_IMAGE_LOC_2 = "https://i.imgur.com/MrFg7OU.png";
-//    blue car - https://i.imgur.com/9bLztIl.png
 
 	private static final String RACETRACK_IMAGE_LOC = "https://i.imgur.com/ZLTZyqQ.png";
 	private static final String TITLE_IMAGE_LOC = "https://i.imgur.com/Ma5LQ7t.png";
 	private static final String GAMEOVER_IMAGE_LOC = "https://i.imgur.com/VRim9Ll.png";
-	private static final String DIRECTIONS_IMAGE_LOC = "https://i.imgur.com/kRhNqxI.png";
+	private static final String DIRECTIONS_IMAGE_LOC = "https://i.imgur.com/7HmavNl.png";
+	private static final String HACKED_IMAGE_LOC = "https://i.imgur.com/2mXVzoA.png";
 	
 	private static final String MEDIA_URL = "music.wav";
-	
-//    private static final String PAUSE_LOC = 
-//    		"https://i.imgur.com/n7HbHdB.png";
 
 	private Image car1Image;
 	private playerCar playerCar;
@@ -63,9 +60,9 @@ public class CharacterMovement extends Application {
 	
 	private Image directionsImage;
 	private ImageView directions;
-
-//    private Image pauseImage;
-//    private Node pause;
+	
+	private Image hackedImage;
+	private ImageView hacked;
 
 	// a surprise tool that will help us later...
 	int hackCounter = 0;
@@ -84,12 +81,15 @@ public class CharacterMovement extends Application {
 		// creating the game background
 		racetrackImage = new Image(RACETRACK_IMAGE_LOC);
 		racetrack = new ImageView(racetrackImage);
-		
-//        pauseImage = new Image(PAUSE_LOC);
-//        pause = new ImageView(pauseImage);
 
+		hackedImage = new Image(HACKED_IMAGE_LOC);
+		hacked = new ImageView(hackedImage);
+		hacked.setX(305);
+		hacked.setY(0);
+		hacked.setVisible(false);
+		
 		// creating the game group
-		Group game = new Group(racetrack, playerCar, enemyCar);
+		Group game = new Group(racetrack, playerCar, enemyCar, hacked);
 
 		// moving cars to proper place and creating the game scene
 		moveCarTo(W / 1.3, H / 2);
@@ -113,7 +113,6 @@ public class CharacterMovement extends Application {
 		titleScreen = new ImageView(titleImage);
 		directionsImage = new Image(DIRECTIONS_IMAGE_LOC);
 		directions = new ImageView(directionsImage);
-		
 		Group title = new Group(titleScreen, directions);
 		
 		// creating the play button and adding it into the title screen
@@ -270,6 +269,7 @@ public class CharacterMovement extends Application {
 					}
 					
 				} else {
+					hacked.setVisible(true);
 					crash(playerCar);
 					reCenter(enemyCar);
 					hackCounter++;
@@ -278,6 +278,7 @@ public class CharacterMovement extends Application {
 					if (playerCar.getLayoutX() <= 5 || playerCar.getLayoutX() >= 800) {
 						// Ideally this next section will properly play the game-over screen, but no
 						// promises.
+						hacked.setVisible(false);
 						stage.setScene(gameoverScreenScene);
 						stage.show();
 					}
@@ -285,6 +286,7 @@ public class CharacterMovement extends Application {
 					// resets hacked status if the player manages not to crash for long enough,
 					// allowing game to continue w/o game over screen
 					if (hackCounter >= 500) {
+						hacked.setVisible(false);
 						playerCar.setHacked(false);
 					}
 				}
