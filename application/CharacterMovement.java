@@ -275,7 +275,7 @@ public class CharacterMovement extends Application {
 					hackCounter++;
 					
 					// checks if car has crashed (game over condition)
-					if (playerCar.getLayoutX() <= 50 || playerCar.getLayoutX() >= 906) {
+					if (playerCar.getLayoutX() <= 5 || playerCar.getLayoutX() >= 800) {
 						// Ideally this next section will properly play the game-over screen, but no
 						// promises.
 						stage.setScene(gameoverScreenScene);
