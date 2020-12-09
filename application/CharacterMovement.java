@@ -8,6 +8,7 @@ import java.util.Random;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.UnsupportedAudioFileException;
 
@@ -44,6 +45,7 @@ public class CharacterMovement extends Application {
 	private static final String HACKED_IMAGE_LOC = "https://i.imgur.com/2mXVzoA.png";
 	
 	private static final String MEDIA_URL = "music.wav";
+	private static final String MEDIA_URL_2 = "soundeffect.wav";
 
 	private Image car1Image;
 	private playerCar playerCar;
@@ -81,12 +83,19 @@ public class CharacterMovement extends Application {
 		// creating the game background
 		racetrackImage = new Image(RACETRACK_IMAGE_LOC);
 		racetrack = new ImageView(racetrackImage);
-
+		
+		// creating the hacked image message and making it not visible
 		hackedImage = new Image(HACKED_IMAGE_LOC);
 		hacked = new ImageView(hackedImage);
 		hacked.setX(305);
 		hacked.setY(0);
 		hacked.setVisible(false);
+		
+		// sound effect to play when hacked
+		File soundeffectMusicPath = new File(MEDIA_URL_2);
+        AudioInputStream soundeffectAudioInput = AudioSystem.getAudioInputStream(soundeffectMusicPath);
+        Clip soundeffectClip = AudioSystem.getClip();
+        soundeffectClip.open(soundeffectAudioInput);
 		
 		// creating the game group
 		Group game = new Group(racetrack, playerCar, enemyCar, hacked);
@@ -106,7 +115,7 @@ public class CharacterMovement extends Application {
 	    ParallelTransition scrollingBackgroundTransition = new ParallelTransition(scrollingBackground);
 	    scrollingBackgroundTransition.play();
 		
-		// creating the title screen with image background
+		// creating the title screen with image background and directions animation
 		stage.setTitle("DRIFT STAGE");
 		
 		titleImage = new Image(TITLE_IMAGE_LOC);
@@ -269,7 +278,11 @@ public class CharacterMovement extends Application {
 					}
 					
 				} else {
+					// hacked message is now visible and sound effect plays
 					hacked.setVisible(true);
+			        soundeffectClip.start();
+			        soundeffectClip.loop(Clip.LOOP_CONTINUOUSLY);
+					
 					crash(playerCar);
 					reCenter(enemyCar);
 					hackCounter++;
@@ -278,7 +291,9 @@ public class CharacterMovement extends Application {
 					if (playerCar.getLayoutX() <= 5 || playerCar.getLayoutX() >= 800) {
 						// Ideally this next section will properly play the game-over screen, but no
 						// promises.
+						// hacked message goes away and sound effect too
 						hacked.setVisible(false);
+						soundeffectClip.stop();
 						stage.setScene(gameoverScreenScene);
 						stage.show();
 					}
@@ -286,7 +301,9 @@ public class CharacterMovement extends Application {
 					// resets hacked status if the player manages not to crash for long enough,
 					// allowing game to continue w/o game over screen
 					if (hackCounter >= 500) {
+						// hacked message goes away and sound effect too
 						hacked.setVisible(false);
+						soundeffectClip.stop();
 						playerCar.setHacked(false);
 					}
 				}
@@ -310,6 +327,9 @@ public class CharacterMovement extends Application {
                 AudioInputStream audioInput = AudioSystem.getAudioInputStream(musicPath);
                 Clip clip = AudioSystem.getClip();
                 clip.open(audioInput);
+                // set volume a bit quieter
+                FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                gainControl.setValue(-10.0f);
                 clip.start();
                 clip.loop(Clip.LOOP_CONTINUOUSLY);
             }
