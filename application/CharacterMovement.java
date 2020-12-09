@@ -65,6 +65,9 @@ public class CharacterMovement extends Application {
 	
 	private Image hackedImage;
 	private ImageView hacked;
+	
+	private int points;
+	private IO io;
 
 	// a surprise tool that will help us later...
 	int hackCounter = 0;
@@ -105,15 +108,12 @@ public class CharacterMovement extends Application {
 		enemyCar.relocate(W / 6, H / 2);
 		Scene gameScene = new Scene(game, W, H);
 		
+		io = new IO();
+		
+		
 		// it's been 84 years to figure this out...
 	    // transition to scroll background vertically
-	    TranslateTransition scrollingBackground = new TranslateTransition(Duration.seconds(1), racetrack);
-	    scrollingBackground.setFromY(-600.0);
-	    scrollingBackground.setToY(0.0);
-	    scrollingBackground.setInterpolator(Interpolator.LINEAR);
-	    scrollingBackground.setCycleCount(Animation.INDEFINITE);
-	    ParallelTransition scrollingBackgroundTransition = new ParallelTransition(scrollingBackground);
-	    scrollingBackgroundTransition.play();
+		io.imageLoop(racetrack, 1);
 		
 		// creating the title screen with image background and directions animation
 		stage.setTitle("DRIFT STAGE");
@@ -125,33 +125,17 @@ public class CharacterMovement extends Application {
 		Group title = new Group(titleScreen, directions);
 		
 		// creating the play button and adding it into the title screen
-		Button startButton = new Button("PLAY");
-		startButton.setMinSize(150, 45);
-		startButton.setLayoutX(320);
-		startButton.setLayoutY(370);
-		startButton.setStyle("-fx-background-color: #ee2364;" + "-fx-font-size: 30;" + "-fx-text-fill: white;");
-		startButton.setOnAction(e -> stage.setScene(gameScene));
+		// creating the play button and adding it into the title screen
 		
-		// creating the second quit button and adding it into the title screen
-		Button quitButton = new Button("QUIT");
-		quitButton.setMinSize(100, 45);
-		quitButton.setLayoutX(340);
-		quitButton.setLayoutY(450);
-		quitButton.setStyle("-fx-background-color: #ee2364;" + "-fx-font-size: 30;" + "-fx-text-fill: white;");
-		quitButton.setOnAction(e -> stage.close());
-		title.getChildren().addAll(startButton, quitButton);
-		
-		Scene titleScreenScene = new Scene(title, 800, 600);
+				Button startButton = io.playButton(stage, gameScene);
+				// creating the second quit button and adding it into the title screen
+				Button quitButton = io.quitButton(stage);
+				title.getChildren().addAll(startButton, quitButton);
+				Scene titleScreenScene = new Scene(title, 800, 600);
 		
 		// transition to scroll directions vertically
 		directions.setX(550);
-		TranslateTransition scrollingDirections = new TranslateTransition(Duration.seconds(10), directions);
-	    scrollingDirections.setFromY(0);
-	    scrollingDirections.setToY(-1200.0);
-	    scrollingDirections.setInterpolator(Interpolator.LINEAR);
-	    scrollingDirections.setCycleCount(Animation.INDEFINITE);
-	    ParallelTransition scrollingDirectionsTransition = new ParallelTransition(scrollingDirections);
-	    scrollingDirectionsTransition.play();
+		io.imageLoop(directions, 10);
 
 		// creating the game over screen with image background
 		gameoverImage = new Image(GAMEOVER_IMAGE_LOC);
@@ -159,22 +143,11 @@ public class CharacterMovement extends Application {
 		Group gameover = new Group(gameoverScreen);
 
 		// creating the try again button and adding it into the game over screen
-		Button gameOverButton = new Button("TRY AGAIN");
-		gameOverButton.setMinSize(100, 100);
-		gameOverButton.setLayoutX(275);
-		gameOverButton.setLayoutY(300);
-		gameOverButton.setStyle("-fx-background-color: white;" + "-fx-font-size: 40;" + "-fx-text-fill: blue;");
-		gameOverButton.setOnAction(e -> stage.setScene(titleScreenScene));
+		Button gameOverButton = io.gameOverButton(stage, titleScreenScene);
 		
 		// creating the second quit button and adding it into the game over screen
-		Button quit2Button = new Button("QUIT");
-		quit2Button.setMinSize(80, 80);
-		quit2Button.setLayoutX(325);
-		quit2Button.setLayoutY(430);
-		quit2Button.setStyle("-fx-background-color: white;" + "-fx-font-size: 40;" + "-fx-text-fill: blue;");
-		quit2Button.setOnAction(e -> stage.close());
+		Button quit2Button = io.quitOverButton(stage);
 		gameover.getChildren().addAll(gameOverButton, quit2Button);
-		
 		Scene gameoverScreenScene = new Scene(gameover, 800, 600);
 		
 		// call to play music
